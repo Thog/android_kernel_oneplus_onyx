@@ -93,7 +93,7 @@ static bool is_dma_coherent(struct device *dev, struct dma_attrs *attrs)
 	return is_coherent;
 }
 
-static int __get_iommu_pgprot(struct dma_attrs *attrs, int prot,
+int __get_iommu_pgprot(struct dma_attrs *attrs, int prot,
 			      bool coherent)
 {
 	if (!dma_get_attr(DMA_ATTR_EXEC_MAPPING, attrs))

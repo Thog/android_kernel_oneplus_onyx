@@ -2157,9 +2157,8 @@ static void wcnssctrl_rx_handler(struct work_struct *worker)
 {
 	int len = 0;
 	int rc = 0;
-	unsigned char buf[sizeof(struct wcnss_version)];
+	struct wcnss_version buf;
 	unsigned char build[WCNSS_MAX_BUILD_VER_LEN+1];
-	struct smd_msg_hdr *phdr;
 	struct smd_msg_hdr smd_msg;
 	struct wcnss_version *pversion;
 	int hw_type;
@@ -2176,16 +2175,14 @@ static void wcnssctrl_rx_handler(struct work_struct *worker)
 		return;
 	}
 
-	rc = smd_read(penv->smd_ch, buf, sizeof(struct smd_msg_hdr));
+	rc = smd_read(penv->smd_ch, &buf.hdr, sizeof(struct smd_msg_hdr));
 	if (rc < sizeof(struct smd_msg_hdr)) {
 		pr_err("wcnss: incomplete header read from smd\n");
 		return;
 	}
 	len -= sizeof(struct smd_msg_hdr);
 
-	phdr = (struct smd_msg_hdr *)buf;
-
-	switch (phdr->msg_type) {
+	switch (buf.hdr.msg_type) {
 
 	case WCNSS_VERSION_RSP:
 		if (len != sizeof(struct wcnss_version)
@@ -2194,13 +2191,13 @@ static void wcnssctrl_rx_handler(struct work_struct *worker)
 					len);
 			return;
 		}
-		rc = smd_read(penv->smd_ch, buf+sizeof(struct smd_msg_hdr),
+		rc = smd_read(penv->smd_ch, (&buf + sizeof(struct smd_msg_hdr)),
 				len);
 		if (rc < len) {
 			pr_err("wcnss: incomplete data read from smd\n");
 			return;
 		}
-		pversion = (struct wcnss_version *)buf;
+		pversion = &buf;
 		penv->fw_major = pversion->major;
 		penv->fw_minor = pversion->minor;
 		snprintf(penv->wcnss_version, WCNSS_VERSION_LEN,
@@ -2240,7 +2237,7 @@ static void wcnssctrl_rx_handler(struct work_struct *worker)
 		break;
 
 	case WCNSS_BUILD_VER_RSP:
-		if (len > WCNSS_MAX_BUILD_VER_LEN) {
+		if (len > WCNSS_MAX_BUILD_VER_LEN || len < 0) {
 			pr_err("wcnss: invalid build version data from wcnss %d\n",
 					len);
 			return;
@@ -2280,7 +2277,7 @@ static void wcnssctrl_rx_handler(struct work_struct *worker)
 		break;
 
 	default:
-		pr_err("wcnss: invalid message type %d\n", phdr->msg_type);
+		pr_err("wcnss: invalid message type %d\n", buf.hdr.msg_type);
 	}
 	return;
 }

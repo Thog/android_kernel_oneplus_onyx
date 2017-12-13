@@ -676,7 +676,7 @@ static inline bool pft_is_inplace_file(struct file *filp)
  *
  * Return: 0 on successe, negative value on failure.
  */
-int pft_get_key_index(struct bio *bio, u32 *key_index,
+int pft_get_key_index(const struct bio *bio, u32 *key_index,
 		      bool *is_encrypted, bool *is_inplace)
 {
 	u32 tag = 0;

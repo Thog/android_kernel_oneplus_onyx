@@ -20,11 +20,11 @@
 #ifdef CONFIG_PFT
 
 /* dm-req-crypt API */
-int pft_get_key_index(struct bio *bio, u32 *key_index,
+int pft_get_key_index(const struct bio *bio, u32 *key_index,
 		      bool *is_encrypted, bool *is_inplace);
 
 /* block layer API */
-bool pft_allow_merge_bio(struct bio *bio1, struct bio *bio2);
+bool pft_allow_merge_bio(const struct bio *bio1, const struct bio *bio2);
 
 /* --- security hooks , called from selinux --- */
 int pft_inode_create(struct inode *dir, struct dentry *dentry, umode_t mode);
@@ -51,7 +51,7 @@ int pft_inode_set_xattr(struct dentry *dentry, const char *name,
 
 
 #else
-static inline int pft_get_key_index(struct bio *bio, u32 *key_index,
+static inline int pft_get_key_index(const struct bio *bio, u32 *key_index,
 				    bool *is_encrypted, bool *is_inplace)
 { return -ENODEV; }
 
